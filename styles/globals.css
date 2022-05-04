@@ -15,6 +15,11 @@ a {
     box-sizing: border-box;
 }
 
+.container {
+    max-width: 1140px;
+    margin: auto;
+}
+
 .login-container {
     width: 100%;
     height: 100vh;
@@ -89,4 +94,129 @@ a {
     font-weight: bold;
     border-bottom: 2px solid;
     cursor: pointer;
+}
+
+.room-list-box {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    margin: 20px 0;
+    box-shadow: 3px 3px 15px #00000020;
+    cursor: pointer;
+}
+
+.room-list-box div {
+    vertical-align: middle;
+    line-height: 60px;
+    color: #777777;
+}
+
+.room-title {
+    width: 60%;
+}
+
+.room-title span {
+    vertical-align: middle;
+}
+
+.room-title div {
+    display: inline;
+    margin-left: 20px;
+    font-size: 0.9rem;
+}
+
+.room-owner {
+    width: 10%;
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+.room-chat-time {
+    width: 10%;
+    font-size: 0.8rem;
+}
+
+.room-head-count {
+    width: 10%;
+    font-size: 0.8rem;
+}
+
+.message-left-box {
+    display: flex;
+    justify-content: start;
+}
+
+.message-right-box {
+    display: flex;
+    justify-content: end;
+}
+
+.message-icon {
+    margin: 0 20px;
+}
+
+.message-text-box {
+    padding-top: 15px;
+}
+
+.message-user-id-left {
+    font-size: 0.9rem;
+    color: #777777;
+    margin-bottom: 10px;
+}
+
+.message-user-id-right {
+    text-align: right;
+    font-size: 0.9rem;
+    color: #777777;
+    margin-bottom: 10px;
+}
+
+.message-text-left {
+    font-size: 0.7rem;
+    font-weight: bold;
+    color: #777777;
+    background: #eeeeee;
+    padding: 5px 10px;
+    border-radius: 0 15px 15px 15px;
+    display: inline-block;
+}
+
+.message-text-right-box {
+    text-align: right;
+}
+
+.message-text-right {
+    font-size: 0.7rem;
+    font-weight: bold;
+    color: #ffffff;
+    background: #5784ff;
+    padding: 5px 10px;
+    border-radius: 15px 0 15px 15px;
+    display: inline-block;
+}
+
+.message-send-box {
+    display: flex;
+    margin: 30px 0;
+}
+
+.send-input-box {
+    width: 100%;
+    height: 60px;
+    padding: 30px;
+    border: 1px solid #aaaaaa;
+}
+
+.send-button {
+    width: 100px;
+    border: none;
+    background: #5784ff;
+    color: #ffffff;
+}
+
+.message-send-time {
+    color: #777777;
+    font-size: 0.7rem;
+    margin: 0 10px;
 }
