@@ -1,13 +1,9 @@
-import Link from 'next/link';
-
 export default function Home() {
-
-
     return (
-        <>
-            <Link href={'/SignIn'}>
-                <a>test</a>
-            </Link>
-        </>
+        <div className="banner-box">
+            <div className="banner-box-wapper">
+                Live Chat System
+            </div>
+        </div>
     )
 }
