@@ -17,7 +17,7 @@ a {
 
 .banner-box {
     width: 100%;
-    height: 600px;
+    height: 750px;
     background-image: url("../public/chat-banner.jpg");
     background-position: center center;
     background-size: cover;
@@ -137,6 +137,7 @@ a {
     justify-content: space-between;
     line-height: 50px;
     margin-top: 20px;
+    text-align: center;
 }
 
 .chat-room-title {
@@ -144,7 +145,6 @@ a {
     width: 60%;
     font-size: 1rem;
     font-weight: bold;
-    text-align: center;
     vertical-align: middle;
 }
 
@@ -171,7 +171,7 @@ a {
 }
 
 .chat-room-chat-time {
-    width: 10%;
+    width: 20%;
     font-size: 0.8rem;
     font-weight: bold;
 }
@@ -189,7 +189,7 @@ a {
 }
 
 .room-chat-time {
-    width: 10%;
+    width: 20%;
     font-size: 0.8rem;
 }
 
@@ -255,14 +255,16 @@ a {
 
 .message-send-box {
     display: flex;
-    margin: 30px 0;
+    margin: 30px auto;
+    box-shadow: 3px 3px 15px #00000020;
+    width: 90%;
 }
 
 .send-input-box {
     width: 100%;
     height: 60px;
     padding: 30px;
-    border: 1px solid #aaaaaa;
+    border: none;
 }
 
 .send-button {
@@ -317,6 +319,7 @@ a {
     line-height: 50px;
     display: flex;
     justify-content: center;
+    margin-bottom: 30px;
 }
 
 .create-room-button {
@@ -337,7 +340,7 @@ a {
 }
 
 .create-room-input {
-    width: 200px;
+    width: 400px;
     height: 30px;
     border: none;
     box-shadow: 3px 3px 15px #00000020;
@@ -349,8 +352,128 @@ a {
 
 .user-list-box {
     width: 20%;
+    border-right: 1px solid #dddddd;
+}
+
+.user-list-title {
+    text-align: center;
+    margin: 10px 0;
+    font-size: 1.0rem;
+    color: #777777;
+    font-weight: bold;
+}
+
+.user-box {
+    display: flex;
+    justify-content: flex-start;
+    margin: 5px 0;
+}
+
+.user-box-name {
+    width: 100px;
+    margin-left: 20px;
+    line-height: 50px;
+    font-size: 0.9rem;
+    color: #777777;
+}
+
+.user-owner {
+    width: 30px;
+    line-height: 50px;
+    font-size: 0.6rem;
+    font-weight: bold;
 }
 
 .chat-box {
     width: 80%;
+}
+
+.chat-box-header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.chat-box-inner {
+    height: 60vh;
+    overflow: auto;
+}
+
+.chat-box-title {
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin: 10px 0;
+    width: 90%;
+}
+
+.room-delete-button {
+    width: 10%;
+    line-height: 50px;
+    text-align: center;
+}
+
+.room-delete-button button {
+    border: none;
+    font-size: 0.8rem;
+    background-color: #f59989;
+    color: #ffffff;
+    padding: 5px;
+    transition: 0.1s;
+    cursor: pointer;
+}
+
+.room-delete-button button:hover {
+    color: #f59989;
+    background-color: #ffffff;
+    transition: 0.1s;
+}
+
+.footer-container {
+    background-color: #333333;
+    color: #ffffff;
+}
+
+.footer-row {
+    display: flex;
+    justify-content: space-around;
+    padding: 30px 0;
+}
+
+.footer-column-1 {
+    display: flex;
+    justify-content: space-between;
+    width: 220px;
+}
+
+.footer-column-1-left {
+    width: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+
+.footer-column-1-right {
+    width: 150px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+
+.footer-column-2 {
+    display: flex;
+    justify-content: space-between;
+    width: 300px;
+}
+
+.footer-column-2 p {
+    margin: 0;
+}
+
+.center {
+    text-align: center;
+}
+
+.footer-column-2-column {
+    width: 100px;
+    cursor: pointer;
 }

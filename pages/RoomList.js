@@ -8,8 +8,13 @@ function RoomList(props) {
     const loginCheckUrl = "http://localhost:8081/api/LoginCheck.php";
     const roomListUrl = "http://localhost:8081/api/GetAllRoom.php";
     const createRoomUrl = "http://localhost:8081/api/CreateRoom.php";
+    const roomUserCountUrl = "http://localhost:8081/api/GetRoomUserCount.php";
+    const roomChatTimeUrl = "http://localhost:8081/api/GetRoomChatTime.php";
 
     const [roomList, setRoomList] = useState([]);
+    const [roomUserCount, setRoomUserCount] = useState([]);
+    const [roomTime, setRoomTime] = useState([]);
+    const [ownerId, setOwnerId] = useState(0);
 
     const createRoom = () => {
         if (localStorage.getItem('user-token') === null) {
@@ -23,13 +28,18 @@ function RoomList(props) {
                     Router.push({ pathname: `./SignIn` });
                     props.setLoginStatus(false);
                 } else {
+                    setOwnerId(res.data.id);
                     axios.post(createRoomUrl, {
                         owner_id: res.data.id,
                         name: document.getElementById("create-room-name").value
                     }).then(res => {
                         Router.push({
                             pathname: `./ChatRoom`,
-                            query: { roomId: res.data }
+                            query: {
+                                roomId: res.data.id,
+                                roomName: res.data.name,
+                                roomOwner: res.data.owner_id
+                            }
                         })
                     })
                 }
@@ -52,6 +62,12 @@ function RoomList(props) {
                     axios.get(roomListUrl).then(res => {
                         setRoomList(res.data);
                     });
+                    axios.get(roomUserCountUrl).then(res => {
+                        setRoomUserCount(res.data);
+                    });
+                    axios.get(roomChatTimeUrl).then(res => {
+                        setRoomTime(res.data);
+                    })
                 }
             })
         }
@@ -69,15 +85,19 @@ function RoomList(props) {
                 roomList.map(room => (
                     <div key={room.id} className='room-list-box' onClick={() => Router.push({
                         pathname: `./ChatRoom`,
-                        query: { roomId: room.id }
+                        query: {
+                            roomId: room.id,
+                            roomName: room.name,
+                            roomOwner: room.user_id
+                        }
                     })}>
                         <div className='room-title'>
                             <Image src={userIcon} width={"50px"} height={"50px"} />
                             <div>{room.name}</div>
                         </div>
-                        <div className='room-owner'>{room.nick_name}</div>
-                        <div className='room-chat-time'>채팅 시간</div>
-                        <div className='room-head-count'>인원수</div>
+                        <div className='room-owner center'>{room.nick_name}</div>
+                        <div className='room-chat-time center'>{roomTime.find(item => item.room_id === room.id) === undefined ? "없음" : roomTime.find(item => item.room_id === room.id).time}</div>
+                        <div className='room-head-count center'>{roomUserCount.find(item => item.room_id === room.id) === undefined ? 0 : roomUserCount.find(item => item.room_id === room.id).user_count}</div>
                     </div>
                 ))
             }
