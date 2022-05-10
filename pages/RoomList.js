@@ -6,6 +6,7 @@ import Router from 'next/router';
 
 function RoomList(props) {
     const loginCheckUrl = "http://localhost:8081/api/LoginCheck.php";
+    const refreshTokenUrl = "http://localhost:8081/api/RefreshToken.php";
     const roomListUrl = "http://localhost:8081/api/GetAllRoom.php";
     const createRoomUrl = "http://localhost:8081/api/CreateRoom.php";
     const roomUserCountUrl = "http://localhost:8081/api/GetRoomUserCount.php";
@@ -14,60 +15,96 @@ function RoomList(props) {
     const [roomList, setRoomList] = useState([]);
     const [roomUserCount, setRoomUserCount] = useState([]);
     const [roomTime, setRoomTime] = useState([]);
-    const [ownerId, setOwnerId] = useState(0);
+
+    const create = (id) => {
+        axios.post(createRoomUrl, {
+            owner_id: id,
+            name: document.getElementById("create-room-name").value
+        }).then(res => {
+            Router.push({
+                pathname: `./ChatRoom`,
+                query: {
+                    roomId: res.data.id,
+                    roomName: res.data.name,
+                    roomOwner: res.data.owner_id
+                }
+            })
+        })
+    }
 
     const createRoom = () => {
-        if (localStorage.getItem('user-token') === null) {
+        if (localStorage.getItem('access_token') === null) {
             Router.push({ pathname: `./SignIn` });
             props.setLoginStatus(false);
         } else {
             axios.post(loginCheckUrl, {
-                token: localStorage.getItem('user-token')
+                access_token: localStorage.getItem('access_token')
             }).then(res => {
-                if (res.data === 0) {
+                if (res.data === -2) {
                     Router.push({ pathname: `./SignIn` });
                     props.setLoginStatus(false);
-                } else {
-                    setOwnerId(res.data.id);
-                    axios.post(createRoomUrl, {
-                        owner_id: res.data.id,
-                        name: document.getElementById("create-room-name").value
+                } else if (res.data === -1) {
+                    axios.post(refreshTokenUrl, {
+                        refresh_token: localStorage.getItem('refresh_token')
                     }).then(res => {
-                        Router.push({
-                            pathname: `./ChatRoom`,
-                            query: {
-                                roomId: res.data.id,
-                                roomName: res.data.name,
-                                roomOwner: res.data.owner_id
-                            }
-                        })
+                        if (res.data !== -1 && res.data !== -2) {
+                            localStorage.setItem("access_token", res.data.access_token);
+                            localStorage.setItem("refresh_token", res.data.refresh_token);
+                            axios.post(loginCheckUrl, {
+                                access_token: res.data.access_token
+                            }).then(res => {
+                                create(res.data.id);
+                            })
+                        } else {
+                            Router.push({ pathname: `./SignIn` });
+                            props.setLoginStatus(false);
+                        }
                     })
+                } else {
+                    create(res.data.id);
                 }
             })
         }
     }
 
+    const loadRoomList = () => {
+        axios.get(roomListUrl).then(res => {
+            setRoomList(res.data);
+        });
+        axios.get(roomUserCountUrl).then(res => {
+            setRoomUserCount(res.data);
+        });
+        axios.get(roomChatTimeUrl).then(res => {
+            setRoomTime(res.data);
+        })
+    }
+
     useEffect(() => {
-        if (localStorage.getItem('user-token') === null) {
+        if (localStorage.getItem('access_token') === null) {
             Router.push({ pathname: `./SignIn` });
             props.setLoginStatus(false);
         } else {
             axios.post(loginCheckUrl, {
-                token: localStorage.getItem('user-token')
+                access_token: localStorage.getItem('access_token')
             }).then(res => {
-                if (res.data === 0) {
+                if (res.data === -2) {
                     Router.push({ pathname: `./SignIn` });
                     props.setLoginStatus(false);
-                } else {
-                    axios.get(roomListUrl).then(res => {
-                        setRoomList(res.data);
-                    });
-                    axios.get(roomUserCountUrl).then(res => {
-                        setRoomUserCount(res.data);
-                    });
-                    axios.get(roomChatTimeUrl).then(res => {
-                        setRoomTime(res.data);
+                } else if (res.data === -1) {
+                    axios.post(refreshTokenUrl, {
+                        refresh_token: localStorage.getItem('refresh_token')
+                    }).then(res => {
+                        if (res.data !== -1 && res.data !== -2) {
+                            localStorage.setItem("access_token", res.data.access_token);
+                            localStorage.setItem("refresh_token", res.data.refresh_token);
+                            loadRoomList();
+                        } else {
+                            Router.push({ pathname: `./SignIn` });
+                            props.setLoginStatus(false);
+                        }
                     })
+                } else {
+                    loadRoomList();
                 }
             })
         }

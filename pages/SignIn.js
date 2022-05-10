@@ -12,7 +12,8 @@ function SignIn(props) {
             password: document.getElementById("user-password").value
         }).then(res => {
             if (res.data) {
-                localStorage.setItem("user-token", res.data);
+                localStorage.setItem("access_token", res.data.access_token);
+                localStorage.setItem("refresh_token", res.data.refresh_token);
                 props.setLoginStatus(true);
                 Router.push({ pathname: `./RoomList` });
             } else {
@@ -22,7 +23,8 @@ function SignIn(props) {
     }
 
     useEffect(() => {
-        localStorage.removeItem('user-token');
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
         props.setLoginStatus(false);
     }, [])
 

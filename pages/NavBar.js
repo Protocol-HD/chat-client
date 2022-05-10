@@ -5,22 +5,37 @@ import Router from 'next/router';
 
 function NavBar(props) {
     const loginCheckUrl = "http://localhost:8081/api/LoginCheck.php";
+    const refreshTokenUrl = "http://localhost:8081/api/RefreshToken.php";
 
     const logout = () => {
-        localStorage.removeItem('user-token');
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
         props.setLoginStatus(false);
         Router.push({ pathname: `./` });
     }
 
     useEffect(() => {
-        if (localStorage.getItem('user-token') === null) {
+        if (localStorage.getItem('access_token') === null) {
             props.setLoginStatus(false);
         } else {
             axios.post(loginCheckUrl, {
-                token: localStorage.getItem('user-token')
+                access_token: localStorage.getItem('access_token')
             }).then(res => {
-                if (res.data === 0) {
+                if (res.data === -2) {
                     props.setLoginStatus(false);
+                } else if (res.data === -1) {
+                    axios.post(refreshTokenUrl, {
+                        refresh_token: localStorage.getItem('refresh_token')
+                    }).then(res => {
+                        if (res.data !== -1 && res.data !== -2) {
+                            localStorage.setItem("access_token", res.data.access_token);
+                            localStorage.setItem("refresh_token", res.data.refresh_token);
+                            props.setLoginStatus(true);
+                        } else {
+                            Router.push({ pathname: `./SignIn` });
+                            props.setLoginStatus(false);
+                        }
+                    })
                 } else {
                     props.setLoginStatus(true);
                 }

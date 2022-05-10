@@ -14,6 +14,7 @@ function ChatRoom(props) {
     const getRoomUserUrl = "http://localhost:8081/api/GetRoomUser.php/?room=";
     const deleteRoomUrl = "http://localhost:8081/api/DeleteRoom.php/?room=";
     const messageLimitUrl = "\&limit=";
+    const refreshTokenUrl = "http://localhost:8081/api/RefreshToken.php";
 
     const [messageList, setMessageList] = useState([]);
     const [roomId, setRoomId] = useState(0);
@@ -27,65 +28,108 @@ function ChatRoom(props) {
         cors: { origin: '*' }
     });
 
+    const send = (id) => {
+        axios.post(messageCreateUrl, {
+            room_id: roomId,
+            send_user_id: id,
+            message_text: document.getElementById('send-input').value
+        }).then(res => {
+            if (res.data) {
+                socket.emit('ClientToServer',
+                    {
+                        room: roomId,
+                        message: document.getElementById('send-input').value
+                    }
+                );
+                document.getElementById('send-input').value = '';
+                axios.get(getRoomUserUrl + router.query.roomId).then(res => {
+                    setUsers(res.data);
+                });
+            }
+        })
+    }
+
     const sendMessage = () => {
         if (document.getElementById('send-input').value !== "") {
-            if (localStorage.getItem('user-token') === null) {
+            if (localStorage.getItem('access_token') === null) {
                 Router.push({ pathname: `./SignIn` });
                 props.setLoginStatus(false);
             } else {
                 axios.post(loginCheckUrl, {
-                    token: localStorage.getItem('user-token')
+                    access_token: localStorage.getItem('access_token')
                 }).then(res => {
-                    if (res.data === 0) {
+                    if (res.data === -2) {
                         Router.push({ pathname: `./SignIn` });
                         props.setLoginStatus(false);
-                    } else {
-                        axios.post(messageCreateUrl, {
-                            room_id: roomId,
-                            send_user_id: res.data.id,
-                            message_text: document.getElementById('send-input').value
+                    } else if (res.data === -1) {
+                        axios.post(refreshTokenUrl, {
+                            refresh_token: localStorage.getItem('refresh_token')
                         }).then(res => {
-                            if (res.data) {
-                                socket.emit('ClientToServer',
-                                    {
-                                        room: roomId,
-                                        message: document.getElementById('send-input').value
-                                    }
-                                );
-                                document.getElementById('send-input').value = '';
-                                axios.get(getRoomUserUrl + router.query.roomId).then(res => {
-                                    setUsers(res.data);
-                                });
+                            if (res.data !== -1 && res.data !== -2) {
+                                localStorage.setItem("access_token", res.data.access_token);
+                                localStorage.setItem("refresh_token", res.data.refresh_token);
+                                axios.post(loginCheckUrl, {
+                                    access_token: localStorage.getItem('access_token')
+                                }).then(res => {
+                                    send(res.data.id);
+                                })
+                            } else {
+                                Router.push({ pathname: `./SignIn` });
+                                props.setLoginStatus(false);
                             }
                         })
+                    } else {
+                        send(res.data.id);
                     }
                 })
             }
         }
     }
 
+    const del = (id) => {
+        if (router.query.roomOwner === id) {
+            if (window.confirm("정말 채팅방을 삭제하시겠습니까?")) {
+                axios.delete(deleteRoomUrl + router.query.roomId).then(res => {
+                    if (res.data) {
+                        alert("삭제되었습니다");
+                        Router.push({ pathname: `./RoomList` });
+                    }
+                });
+            }
+        }
+    }
+
     const deleteRoom = () => {
-        if (localStorage.getItem('user-token') === null) {
+        if (localStorage.getItem('access_token') === null) {
             Router.push({ pathname: `./SignIn` });
             props.setLoginStatus(false);
         } else {
             axios.post(loginCheckUrl, {
-                token: localStorage.getItem('user-token')
+                access_token: localStorage.getItem('access_token')
             }).then(res => {
-                if (res.data === 0) {
+                if (res.data === -2) {
                     Router.push({ pathname: `./SignIn` });
                     props.setLoginStatus(false);
-                } else {
-                    if (router.query.roomOwner === res.data.id) {
-                        if (window.confirm("정말 채팅방을 삭제하시겠습니까?")) {
-                            axios.delete(deleteRoomUrl + router.query.roomId).then(res => {
-                                if (res.data) {
-                                    alert("삭제되었습니다");
-                                    Router.push({ pathname: `./RoomList` });
-                                }
+                }
+                else if (res.data === -1) {
+                    axios.post(refreshTokenUrl, {
+                        refresh_token: localStorage.getItem('refresh_token')
+                    }).then(res => {
+                        if (res.data !== -1 && res.data !== -2) {
+                            localStorage.setItem("access_token", res.data.access_token);
+                            localStorage.setItem("refresh_token", res.data.refresh_token);
+                            axios.post(loginCheckUrl, {
+                                access_token: localStorage.getItem('access_token')
+                            }).then(res => {
+                                del(res.data.id);
                             });
+                        } else {
+                            Router.push({ pathname: `./SignIn` });
+                            props.setLoginStatus(false);
                         }
-                    }
+                    })
+                } else {
+                    del(res.data.id);
                 }
             })
         }
@@ -101,7 +145,6 @@ function ChatRoom(props) {
 
     useEffect(() => {
         document.getElementById('chat-box-inner').addEventListener('scroll', () => {
-            // console.log(document.getElementById('chat-box-inner').scrollTop)
             if (document.getElementById('chat-box-inner').scrollTop === 0) {
                 setMessageLimit(messageLimit => messageLimit + 5);
             }
@@ -111,53 +154,75 @@ function ChatRoom(props) {
     useEffect(() => {
         axios.get(messageGetUrl + router.query.roomId + messageLimitUrl + messageLimit).then(res => {
             setMessageList(res.data);
+            document.getElementById('chat-box-inner').scrollTop = 1;
         })
     }, [messageLimit])
 
+    const joinChatRoom = (id) => {
+        setUserId(id);
+        setRoomId(router.query.roomId);
+
+        if (router.query.roomOwner !== id) {
+            document.getElementById('room-delete-button').style.display = 'none';
+        }
+
+        axios.get(messageGetUrl + router.query.roomId + messageLimitUrl + messageLimit).then(res => {
+            setMessageList(res.data);
+        }).then(() => {
+            document.getElementById('chat-box-inner').scrollTop = document.getElementById('chat-box-inner').scrollHeight;
+        });
+
+        axios.get(getRoomUserUrl + router.query.roomId).then(res => {
+            setUsers(res.data);
+        });
+
+        socket.emit('joinRoom', router.query.roomId);
+
+        socket.on('ServerToClient', data => {
+            axios.get(messageGetUrl + router.query.roomId + messageLimitUrl + messageLimit).then(res => {
+                setMessageList(res.data);
+            }).then(() => {
+                document.getElementById('chat-box-inner').scrollTop = document.getElementById('chat-box-inner').scrollHeight;
+            });
+        });
+    }
+
     useEffect(() => {
-        if (localStorage.getItem('user-token') === null) {
+        if (localStorage.getItem('access_token') === null) {
             Router.push({ pathname: `./SignIn` });
             props.setLoginStatus(false);
         } else {
             axios.post(loginCheckUrl, {
-                token: localStorage.getItem('user-token')
+                access_token: localStorage.getItem('access_token')
             }).then(res => {
-                if (res.data === 0) {
+                if (res.data === -2) {
                     Router.push({ pathname: `./SignIn` });
                     props.setLoginStatus(false);
+                } else if (res.data === -1) {
+                    axios.post(refreshTokenUrl, {
+                        refresh_token: localStorage.getItem('refresh_token')
+                    }).then(res => {
+                        if (res.data !== -1 && res.data !== -2) {
+                            localStorage.setItem("access_token", res.data.access_token);
+                            localStorage.setItem("refresh_token", res.data.refresh_token);
+                            axios.post(loginCheckUrl, {
+                                access_token: res.data.access_token
+                            }).then(res => {
+                                joinChatRoom(res.data.id);
+                            })
+                        } else {
+                            Router.push({ pathname: `./SignIn` });
+                            props.setLoginStatus(false);
+                        }
+                    })
                 } else {
-                    setUserId(res.data.id);
-                    setRoomId(router.query.roomId);
-
-                    if (router.query.roomOwner !== res.data.id) {
-                        document.getElementById('room-delete-button').style.display = 'none';
-                    }
-
-                    axios.get(messageGetUrl + router.query.roomId + messageLimitUrl + messageLimit).then(res => {
-                        setMessageList(res.data);
-                    }).then(() => {
-                        document.getElementById('chat-box-inner').scrollTop = document.getElementById('chat-box-inner').scrollHeight;
-                    });
-
-                    axios.get(getRoomUserUrl + router.query.roomId).then(res => {
-                        setUsers(res.data);
-                    });
-
-                    socket.emit('joinRoom', router.query.roomId + messageLimitUrl + messageLimit);
-
-                    socket.on('ServerToClient', data => {
-                        axios.get(messageGetUrl + router.query.roomId).then(res => {
-                            setMessageList(res.data);
-                        }).then(() => {
-                            document.getElementById('chat-box-inner').scrollTop = document.getElementById('chat-box-inner').scrollHeight;
-                        });
-                    });
+                    joinChatRoom(res.data.id);
                 }
             })
         }
     }, [])
 
-    
+
 
     return (
         <div className="container chat-container">
