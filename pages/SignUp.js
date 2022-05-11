@@ -5,7 +5,7 @@ import axios from 'axios';
 import Router from 'next/router';
 
 function SignUp() {
-    const createUserUrl = "http://localhost:8081/api/CreateUser.php";
+    const createUserUrl = "/api/CreateUser.php";
 
     const signUp = () => {
         axios.post(createUserUrl, {

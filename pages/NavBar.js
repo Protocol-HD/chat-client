@@ -4,8 +4,8 @@ import axios from 'axios';
 import Router from 'next/router';
 
 function NavBar(props) {
-    const loginCheckUrl = "http://localhost:8081/api/LoginCheck.php";
-    const refreshTokenUrl = "http://localhost:8081/api/RefreshToken.php";
+    const loginCheckUrl = "/api/LoginCheck.php";
+    const refreshTokenUrl = "/api/RefreshToken.php";
 
     const logout = () => {
         localStorage.removeItem('access_token');

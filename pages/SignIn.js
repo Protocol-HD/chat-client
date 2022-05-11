@@ -4,7 +4,7 @@ import axios from 'axios';
 import Router from 'next/router';
 
 function SignIn(props) {
-    const loginUrl = "http://localhost:8081/api/Login.php";
+    const loginUrl = "/api/Login.php";
 
     const login = () => {
         axios.post(loginUrl, {

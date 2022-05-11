@@ -8,13 +8,15 @@ import userIcon from '../public/user.svg';
 import Router from 'next/router';
 
 function ChatRoom(props) {
-    const loginCheckUrl = "http://localhost:8081/api/LoginCheck.php";
-    const messageCreateUrl = "http://localhost:8081/api/CreateMessages.php";
-    const messageGetUrl = "http://localhost:8081/api/GetAllRoomMessages.php/?room=";
-    const getRoomUserUrl = "http://localhost:8081/api/GetRoomUser.php/?room=";
-    const deleteRoomUrl = "http://localhost:8081/api/DeleteRoom.php/?room=";
+    const loginCheckUrl = "/api/LoginCheck.php";
+    const messageCreateUrl = "/api/CreateMessages.php";
+    const messageGetUrl = "/api/GetAllRoomMessages.php/?room=";
+    const getRoomUserUrl = "/api/GetRoomUser.php/?room=";
+    const deleteRoomUrl = "/api/DeleteRoom.php/?room=";
     const messageLimitUrl = "\&limit=";
-    const refreshTokenUrl = "http://localhost:8081/api/RefreshToken.php";
+    const refreshTokenUrl = "/api/RefreshToken.php";
+    // const socketUrl = "http://gudehd.asuscomm.com:8080";
+    const socketUrl = "http://localhost:8080";
 
     const [messageList, setMessageList] = useState([]);
     const [roomId, setRoomId] = useState(0);
@@ -23,7 +25,7 @@ function ChatRoom(props) {
     const [messageLimit, setMessageLimit] = useState(10);
 
     const router = useRouter();
-    const socket = socketio.connect('http://localhost:8080', {
+    const socket = socketio.connect(socketUrl, {
         transports: ['websocket'],
         cors: { origin: '*' }
     });

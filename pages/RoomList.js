@@ -5,12 +5,12 @@ import axios from 'axios';
 import Router from 'next/router';
 
 function RoomList(props) {
-    const loginCheckUrl = "http://localhost:8081/api/LoginCheck.php";
-    const refreshTokenUrl = "http://localhost:8081/api/RefreshToken.php";
-    const roomListUrl = "http://localhost:8081/api/GetAllRoom.php";
-    const createRoomUrl = "http://localhost:8081/api/CreateRoom.php";
-    const roomUserCountUrl = "http://localhost:8081/api/GetRoomUserCount.php";
-    const roomChatTimeUrl = "http://localhost:8081/api/GetRoomChatTime.php";
+    const loginCheckUrl = "/api/LoginCheck.php";
+    const refreshTokenUrl = "/api/RefreshToken.php";
+    const roomListUrl = "/api/GetAllRoom.php";
+    const createRoomUrl = "/api/CreateRoom.php";
+    const roomUserCountUrl = "/api/GetRoomUserCount.php";
+    const roomChatTimeUrl = "/api/GetRoomChatTime.php";
 
     const [roomList, setRoomList] = useState([]);
     const [roomUserCount, setRoomUserCount] = useState([]);
